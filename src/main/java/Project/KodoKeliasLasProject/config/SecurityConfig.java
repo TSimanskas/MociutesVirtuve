@@ -39,7 +39,9 @@ public class SecurityConfig {
                     .logoutSuccessUrl("/recipes")
                     .permitAll()
             )
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                    .ignoringRequestMatchers("/h2-console/**")
+            )
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
         return http.build();
     }

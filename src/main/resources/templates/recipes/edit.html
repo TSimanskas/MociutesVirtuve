@@ -210,6 +210,7 @@
             </a>
 
             <form th:action="@{/logout}" method="post">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <button type="submit" class="logout-btn">Atsijungti</button>
             </form>
         </nav>
@@ -220,6 +221,7 @@
             <h2>Redaguoti receptą</h2>
 
             <form th:action="@{/recipes/{id}/edit(id=${recipe.id})}" th:object="${recipeForm}" method="post" enctype="multipart/form-data">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <div class="field">
                     <label for="title">Pavadinimas</label>
                     <input id="title" th:field="*{title}" type="text" required>

@@ -335,6 +335,7 @@
                       th:text="${currentProfileInitial}">V</span>
             </a>
             <form th:action="@{/logout}" method="post">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <button type="submit" class="logout-btn">Atsijungti</button>
             </form>
         </nav>
@@ -385,6 +386,7 @@
                 <h3>Redaguoti profilį</h3>
 
                 <form th:action="@{/profile}" th:object="${profileForm}" method="post" enctype="multipart/form-data">
+                    <th:block th:replace="~{fragments/csrf :: token}"/>
                     <input id="profileImage"
                            class="image-input"
                            th:field="*{profileImage}"

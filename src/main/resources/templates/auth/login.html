@@ -149,6 +149,7 @@
             </p>
 
             <form th:action="@{/login}" method="post" autocomplete="off">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <label for="username">Vartotojo vardas</label>
                 <input id="username"
                        name="username"

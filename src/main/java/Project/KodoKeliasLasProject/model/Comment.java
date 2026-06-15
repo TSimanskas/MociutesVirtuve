@@ -1,8 +1,8 @@
 package Project.KodoKeliasLasProject.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,8 +27,11 @@ public class Comment {
     @JoinColumn(name = "recipe_id", nullable = false)
     private Recipe recipe;
 
-
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
+    @PrePersist
+    void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

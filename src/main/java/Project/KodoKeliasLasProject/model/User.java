@@ -1,6 +1,5 @@
 package Project.KodoKeliasLasProject.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,16 +34,17 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
-    @OneToMany (mappedBy = "author", cascade = CascadeType.ALL,  orphanRemoval = true)
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recipe> recipes = new ArrayList<>();
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-
-
+    @PrePersist
+    void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

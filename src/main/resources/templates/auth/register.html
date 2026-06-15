@@ -128,6 +128,7 @@
             <h2>Nauja paskyra</h2>
 
             <form th:action="@{/register}" th:object="${registerForm}" method="post">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <div class="field">
                     <label for="username">Vartotojo vardas</label>
                     <input id="username" th:field="*{username}" type="text" autocomplete="username" required>

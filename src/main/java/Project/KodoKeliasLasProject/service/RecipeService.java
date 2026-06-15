@@ -11,6 +11,8 @@ import Project.KodoKeliasLasProject.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.Normalizer;
@@ -22,12 +24,14 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RecipeService {
 
     private static final List<String> CATEGORIES = List.of(
             "Desertai",
             "Gėrimai",
             "Kepiniai",
+            "Konservavimas",
             "Padažai",
             "Pagrindiniai patiekalai",
             "Pusryčiai",
@@ -45,8 +49,19 @@ public class RecipeService {
         return CATEGORIES;
     }
 
+    public void validateCategory(String category, BindingResult bindingResult) {
+        if (category == null || category.isBlank()) {
+            return;
+        }
+
+        if (!CATEGORIES.contains(category)) {
+            bindingResult.rejectValue("category", "category.invalid", "Pasirinkite galiojančią kategoriją.");
+        }
+    }
+
+    @Transactional(readOnly = true)
     public RecipeListData buildRecipeList(String category, String search) {
-        List<Recipe> allRecipes = recipeRepository.findAllByOrderByCreatedAtDesc();
+        List<Recipe> allRecipes = recipeRepository.findAllWithAuthorByOrderByCreatedAtDesc();
         List<Recipe> searchedRecipes = filterRecipesBySearch(allRecipes, search);
         List<Recipe> recipes = filterRecipesByCategory(searchedRecipes, category);
         Map<String, Long> categoryCounts = countRecipesByCategory(searchedRecipes);
@@ -77,9 +92,10 @@ public class RecipeService {
         return recipeRepository.save(recipe);
     }
 
+    @Transactional(readOnly = true)
     public RecipeDetailData buildRecipeDetail(Long id, User currentUserOrNull) {
         Recipe recipe = requireRecipe(id);
-        List<Comment> comments = commentRepository.findByRecipeOrderByCreatedAtAsc(recipe);
+        List<Comment> comments = commentRepository.findByRecipeWithAuthorOrderByCreatedAtAsc(recipe);
 
         return new RecipeDetailData(
                 recipe,
@@ -92,12 +108,14 @@ public class RecipeService {
         );
     }
 
+    @Transactional(readOnly = true)
     public Recipe requireRecipe(Long id) {
-        return recipeRepository.findById(id)
+        return recipeRepository.findByIdWithAuthor(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Recipe not found"));
     }
 
+    @Transactional(readOnly = true)
     public Recipe requireRecipeForManage(Long id, User currentUser) {
         Recipe recipe = requireRecipe(id);
         requireCanManage(recipe.getAuthor(), currentUser);
@@ -108,13 +126,16 @@ public class RecipeService {
         Recipe recipe = requireRecipeForManage(id, currentUser);
         updateRecipeFromForm(recipe, recipeForm);
         if (recipeForm.getRecipeImage() != null && !recipeForm.getRecipeImage().isEmpty()) {
+            String previousImageUrl = recipe.getImageUrl();
             recipe.setImageUrl(imageStorageService.saveRecipeImage(recipeForm.getRecipeImage()));
+            imageStorageService.deleteStoredImage(previousImageUrl);
         }
         recipeRepository.save(recipe);
     }
 
     public void deleteRecipe(Long id, User currentUser) {
         Recipe recipe = requireRecipeForManage(id, currentUser);
+        imageStorageService.deleteStoredImage(recipe.getImageUrl());
         recipeRepository.delete(recipe);
     }
 
@@ -138,12 +159,14 @@ public class RecipeService {
         commentRepository.save(comment);
     }
 
+    @Transactional(readOnly = true)
     public Comment requireComment(Long id) {
-        return commentRepository.findById(id)
+        return commentRepository.findByIdWithAuthorAndRecipe(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Comment not found"));
     }
 
+    @Transactional(readOnly = true)
     public Comment requireCommentForManage(Long commentId, User currentUser) {
         Comment comment = requireComment(commentId);
         requireCanManage(comment.getAuthor(), currentUser);
@@ -246,7 +269,7 @@ public class RecipeService {
         }
     }
 
-    private boolean canManage(User author, User currentUser) {
+    boolean canManage(User author, User currentUser) {
         if (author == null || currentUser == null) {
             return false;
         }

@@ -439,6 +439,7 @@
             </a>
 
             <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <button type="submit" class="logout-btn">Atsijungti</button>
             </form>
         </nav>
@@ -477,6 +478,7 @@
                 <form th:action="@{/recipes/{id}/delete(id=${recipe.id})}"
                       method="post"
                       onsubmit="return confirm('Ar tikrai norite ištrinti šį receptą?');">
+                    <th:block th:replace="~{fragments/csrf :: token}"/>
                     <button type="submit" class="delete-btn">Ištrinti receptą</button>
                 </form>
             </div>
@@ -514,6 +516,7 @@
                       th:action="@{/recipes/{id}/comments(id=${recipe.id})}"
                       th:object="${commentForm}"
                       method="post">
+                    <th:block th:replace="~{fragments/csrf :: token}"/>
                     <label for="text">Pridėti komentarą</label>
                     <textarea id="text" th:field="*{text}" required></textarea>
                     <p class="field-error" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">
@@ -556,6 +559,7 @@
                             <form th:action="@{/recipes/comments/{id}/delete(id=${comment.id})}"
                                   method="post"
                                   onsubmit="return confirm('Ar tikrai norite ištrinti šį komentarą?');">
+                                <th:block th:replace="~{fragments/csrf :: token}"/>
                                 <button type="submit" class="delete-btn">Ištrinti</button>
                             </form>
                         </div>

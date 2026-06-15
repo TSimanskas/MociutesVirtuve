@@ -126,6 +126,7 @@
             <h2>Redaguoti komentarą</h2>
 
             <form th:action="@{/recipes/comments/{id}/edit(id=${comment.id})}" th:object="${commentForm}" method="post">
+                <th:block th:replace="~{fragments/csrf :: token}"/>
                 <label for="text">Komentaras</label>
                 <textarea id="text" th:field="*{text}" required></textarea>
                 <p class="field-error" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">

@@ -7,9 +7,11 @@ import Project.KodoKeliasLasProject.repository.RecipeRepository;
 import Project.KodoKeliasLasProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProfileService {
 
     private final UserRepository userRepository;
@@ -18,6 +20,7 @@ public class ProfileService {
     private final ImageStorageService imageStorageService;
     private final UserService userService;
 
+    @Transactional(readOnly = true)
     public ProfilePageData buildProfilePageData(User user) {
         return new ProfilePageData(
                 user,
@@ -30,7 +33,9 @@ public class ProfileService {
     public void updateProfile(User user, ProfileForm profileForm) {
         user.setDisplayName(profileForm.getDisplayName().trim());
         if (profileForm.getProfileImage() != null && !profileForm.getProfileImage().isEmpty()) {
+            String previousImageUrl = user.getProfileImageUrl();
             user.setProfileImageUrl(imageStorageService.saveProfileImage(profileForm.getProfileImage()));
+            imageStorageService.deleteStoredImage(previousImageUrl);
         }
         userRepository.save(user);
     }

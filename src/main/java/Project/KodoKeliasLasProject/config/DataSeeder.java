@@ -6,30 +6,38 @@ import Project.KodoKeliasLasProject.model.User;
 import Project.KodoKeliasLasProject.repository.RecipeRepository;
 import Project.KodoKeliasLasProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final RecipeRepository recipeRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Value("${app.seed.admin-password}")
+    private String adminPassword;
 
     @Override
     public void run(String... args) {
         User admin = userRepository.findByUsername("admin")
                 .orElseGet(this::createAdminUser);
-        java.util.List<Recipe> existingRecipes = new java.util.ArrayList<>(recipeRepository.findAll());
+        List<Recipe> existingRecipes = new ArrayList<>(recipeRepository.findAll());
 
         saveRecipeIfMissing(existingRecipes, createChocolateChipCookies(admin), "Chocolate Chip Cookies");
         saveRecipeIfMissing(existingRecipes, createGrandmaCake(admin), "Simple Homemade Cake");
         saveRecipeIfMissing(existingRecipes, createColdBeetrootSoup(admin), "Lithuanian Cold Beetroot Soup");
     }
 
-    private void saveRecipeIfMissing(java.util.List<Recipe> existingRecipes, Recipe recipe, String previousTitle) {
+    private void saveRecipeIfMissing(List<Recipe> existingRecipes, Recipe recipe, String previousTitle) {
         Recipe existingRecipe = existingRecipes.stream()
                 .filter(savedRecipe -> hasSameTitle(savedRecipe, recipe.getTitle())
                         || hasSameTitle(savedRecipe, previousTitle))
@@ -59,7 +67,7 @@ public class DataSeeder implements CommandLineRunner {
         User admin = new User();
         admin.setUsername("admin");
         admin.setDisplayName("Tomas");
-        admin.setPasswordHash(passwordEncoder.encode("Tomas186!"));
+        admin.setPasswordHash(passwordEncoder.encode(adminPassword));
         admin.setRole(Role.ADMIN);
 
         return userRepository.save(admin);

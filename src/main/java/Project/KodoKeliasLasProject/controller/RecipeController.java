@@ -65,6 +65,7 @@ public class RecipeController {
                          Model model,
                          Principal principal) {
         imageStorageService.validateRecipeImage(recipeForm.getRecipeImage(), bindingResult);
+        recipeService.validateCategory(recipeForm.getCategory(), bindingResult);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", recipeService.getCategories());
@@ -112,6 +113,7 @@ public class RecipeController {
         var recipe = recipeService.requireRecipeForManage(id, userService.requireUser(principal));
 
         imageStorageService.validateRecipeImage(recipeForm.getRecipeImage(), bindingResult);
+        recipeService.validateCategory(recipeForm.getCategory(), bindingResult);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("recipe", recipe);

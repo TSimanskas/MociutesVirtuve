@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Naujas receptas · Močiutės Receptai</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: Georgia, 'Times New Roman', serif;
+            color: #3b2a1f;
+            background: #fffaf2;
+        }
+
+        header {
+            background: #f5e9d7;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e6d5b8;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.4rem);
+            letter-spacing: 0.08em;
+        }
+
+        header a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .auth-nav {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #8a5a3b;
+            font-size: 1rem;
+            letter-spacing: normal;
+        }
+
+        .auth-nav a,
+        .logout-btn {
+            color: #8a5a3b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font: inherit;
+            text-decoration: none;
+        }
+
+        .auth-nav a:hover,
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .auth-nav .profile-icon-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 2px solid #8a5a3b;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f8ead6;
+            text-decoration: none;
+        }
+
+        .auth-nav .profile-icon-link:hover {
+            background: #ead7bd;
+            text-decoration: none;
+        }
+
+        .profile-icon,
+        .profile-icon-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .profile-icon {
+            display: block;
+            object-fit: cover;
+        }
+
+        .profile-icon-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a5a3b;
+            font-weight: bold;
+            background: #f8ead6;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+        }
+
+        .form-card {
+            background: #fff;
+            border: 1px solid #e6d5b8;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(59, 42, 31, 0.08);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid #e6d5b8;
+            border-radius: 6px;
+            color: #3b2a1f;
+            font: inherit;
+            background: #fff;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #d8bd95;
+            outline-offset: 2px;
+        }
+
+        .field {
+            margin-bottom: 1.25rem;
+        }
+
+        .field-error {
+            margin-top: 0.35rem;
+            color: #8a3325;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .submit-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 0.9rem 1.5rem;
+            background: #8a5a3b;
+            color: #fffaf2;
+            font: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #6d4529;
+        }
+
+        .back-link {
+            color: #8a5a3b;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .auth-nav {
+                position: static;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a th:href="@{/main}">MOČIUTĖS RECEPTAI</a></h1>
+        <nav class="auth-nav">
+            <a th:href="@{/profile}" class="profile-icon-link" th:attr="aria-label=|Profilis: ${currentDisplayName}|">
+                <img class="profile-icon"
+                     th:if="${currentProfileImageUrl != null and not #strings.isEmpty(currentProfileImageUrl)}"
+                     th:src="${currentProfileImageUrl}"
+                     th:alt="${currentDisplayName}">
+                <span class="profile-icon-placeholder"
+                      th:unless="${currentProfileImageUrl != null and not #strings.isEmpty(currentProfileImageUrl)}"
+                      th:text="${currentProfileInitial}">V</span>
+            </a>
+
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Atsijungti</button>
+            </form>
+        </nav>
+    </header>
+
+    <main>
+        <section class="form-card">
+            <h2>Naujas receptas</h2>
+
+            <form th:action="@{/recipes/new}" th:object="${recipeForm}" method="post" enctype="multipart/form-data">
+                <div class="field">
+                    <label for="title">Pavadinimas</label>
+                    <input id="title" th:field="*{title}" type="text" required>
+                    <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                        Pavadinimo klaida
+                    </p>
+                </div>
+
+                <div class="field">
+                    <label for="category">Kategorija</label>
+                    <select id="category" th:field="*{category}" required>
+                        <option value="">Pasirinkite kategoriją</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category}"
+                                th:text="${category}">
+                            Kategorija
+                        </option>
+                    </select>
+                    <p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">
+                        Kategorijos klaida
+                    </p>
+                </div>
+
+                <div class="field">
+                    <label for="description">Trumpas aprašymas</label>
+                    <input id="description" th:field="*{description}" type="text">
+                    <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
+                        Aprašymo klaida
+                    </p>
+                </div>
+
+                <div class="field">
+                    <label for="ingredients">Ingredientai</label>
+                    <textarea id="ingredients" th:field="*{ingredients}" required></textarea>
+                    <p class="field-error" th:if="${#fields.hasErrors('ingredients')}" th:errors="*{ingredients}">
+                        Ingredientų klaida
+                    </p>
+                </div>
+
+                <div class="field">
+                    <label for="instructions">Gaminimas</label>
+                    <textarea id="instructions" th:field="*{instructions}" required></textarea>
+                    <p class="field-error" th:if="${#fields.hasErrors('instructions')}" th:errors="*{instructions}">
+                        Gaminimo klaida
+                    </p>
+                </div>
+
+                <div class="field">
+                    <label for="recipeImage">Nuotrauka (nebūtina)</label>
+                    <input id="recipeImage" th:field="*{recipeImage}" type="file" accept="image/*">
+                    <p class="field-error" th:if="${#fields.hasErrors('recipeImage')}" th:errors="*{recipeImage}">
+                        Nuotraukos klaida
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/recipes/all}" class="back-link">← Atgal į visus receptus</a>
+                    <button type="submit" class="submit-btn">Išsaugoti receptą</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

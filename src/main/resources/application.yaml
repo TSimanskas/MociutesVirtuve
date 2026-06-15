@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: grandmas-recipes
+
+  # Use profile "postgres" when connecting to PostgreSQL, e.g.:
+  #   .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=postgres"
+  #   $env:SPRING_PROFILES_ACTIVE="postgres"; .\mvnw.cmd spring-boot:run
+
+  datasource:
+    url: jdbc:h2:mem:recipesdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  thymeleaf:
+    cache: false
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Receptai · Močiutės Receptai</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: Georgia, 'Times New Roman', serif;
+            color: #3b2a1f;
+            background: #fffaf2;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #f8ead6;
+            padding: 1rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        header img {
+            display: block;
+            max-width: min(98%, 720px);
+            max-height: 340px;
+            object-fit: contain;
+        }
+
+        header a {
+            display: inline-block;
+            line-height: 0;
+        }
+
+        .auth-nav {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            line-height: 1;
+            color: #8a5a3b;
+            font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+            font-weight: bold;
+        }
+
+        .auth-nav a,
+        .logout-btn {
+            display: inline-block;
+            line-height: 1;
+            color: #fffaf2;
+            background: #6d4529;
+            padding: 0.75rem 1.1rem;
+            border: 1px solid #5a351f;
+            border-radius: 0;
+            border-bottom-left-radius: 16px;
+            cursor: pointer;
+            font: inherit;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(59, 42, 31, 0.12);
+        }
+
+        .auth-nav a:hover,
+        .logout-btn:hover {
+            background: #8a5a3b;
+            text-decoration: none;
+        }
+
+        .auth-nav .profile-icon-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 2px solid #8a5a3b;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f8ead6;
+        }
+
+        .auth-nav .profile-icon-link:hover {
+            background: #ead7bd;
+            text-decoration: none;
+        }
+
+        .profile-icon,
+        .profile-icon-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .profile-icon {
+            display: block;
+            object-fit: cover;
+        }
+
+        .profile-icon-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a5a3b;
+            font-weight: bold;
+            background: #f8ead6;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            flex: 1;
+            width: 100%;
+        }
+
+        .sidebar {
+            background: #f8ead6;
+            border-right: 1px solid #e7cfaa;
+            padding: 2rem 1.25rem;
+            text-align: center;
+        }
+
+        .sidebar-btn {
+            display: inline-block;
+            text-align: center;
+            width: 190px;
+            padding: 1rem 1.5rem;
+            background: #8a5a3b;
+            color: #fffaf2;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            transition: background 0.2s;
+        }
+
+        .sidebar-btn:hover {
+            background: #6d4529;
+        }
+
+        .new-recipe-link {
+            display: inline-block;
+            margin-top: 1rem;
+            width: 190px;
+            padding: 1rem 1.5rem;
+            background: #8a5a3b;
+            color: #fffaf2;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            transition: background 0.2s;
+        }
+
+        .new-recipe-link:hover {
+            background: #6d4529;
+        }
+
+        main {
+            border-top: 1px solid #e7cfaa;
+            padding: 4rem 2.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+        }
+
+        main h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .rules-panel {
+            width: min(100%, 680px);
+            transform: translateX(-130px);
+        }
+
+        .instructions {
+            list-style: none;
+            counter-reset: step;
+        }
+
+        .instructions li {
+            counter-increment: step;
+            padding: 0.75rem 0 0.75rem 2.5rem;
+            position: relative;
+            line-height: 1.6;
+            font-size: 1.05rem;
+            text-align: left;
+        }
+
+        .instructions li::before {
+            content: counter(step) ".";
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+            font-weight: bold;
+            color: #8a5a3b;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 720px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e7cfaa;
+            }
+
+            main {
+                padding: 2rem 1.5rem 4rem;
+            }
+
+            .rules-panel {
+                transform: none;
+            }
+
+            .auth-nav {
+                position: static;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a th:href="@{/main}">
+            <img th:src="@{/images/mociutes-virtuve.png}" alt="Močiutės virtuvė">
+        </a>
+        <nav class="auth-nav">
+            <a sec:authorize="isAnonymous()" th:href="@{/login}">Prisijungti</a>
+
+            <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="profile-icon-link" th:attr="aria-label=|Profilis: ${currentDisplayName}|">
+                <img class="profile-icon"
+                     th:if="${currentProfileImageUrl != null and not #strings.isEmpty(currentProfileImageUrl)}"
+                     th:src="${currentProfileImageUrl}"
+                     th:alt="${currentDisplayName}">
+                <span class="profile-icon-placeholder"
+                      th:unless="${currentProfileImageUrl != null and not #strings.isEmpty(currentProfileImageUrl)}"
+                      th:text="${currentProfileInitial}">V</span>
+            </a>
+
+            <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Atsijungti</button>
+            </form>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <a th:href="@{/recipes/all}" class="sidebar-btn">Visi receptai</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{/recipes/new}" class="new-recipe-link">
+                Naujas receptas
+            </a>
+        </aside>
+
+        <main>
+            <div class="rules-panel">
+                <h2>Puslapio taisyklės!</h2>
+                <ol class="instructions">
+                    <li>
+                       Gerbkite vieni kitus ir bendraukite draugiškai.
+                    </li>
+                    <li>
+                        Įkeldami naujus receptus naudokite pagarbią kalbą.
+                    </li>
+                    <li>
+                        Visus receptus rasite paspaudę mygtuką
+                        <strong>„Visi receptai"</strong> kairėje pusėje.
+                    </li>
+                    <li>
+                        Norėdami sukurti naują paskyrą, viršuje dešinėje paspauskite <strong>Prisijungti</strong>, tada <strong>Nauja paskyra.</strong>
+                    </li>
+                </ol>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

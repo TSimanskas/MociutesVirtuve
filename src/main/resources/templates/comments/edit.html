@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Redaguoti komentarą · Močiutės Receptai</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: Georgia, 'Times New Roman', serif;
+            color: #3b2a1f;
+            background: #fffaf2;
+        }
+
+        header {
+            background: #f5e9d7;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e6d5b8;
+        }
+
+        header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.4rem);
+            letter-spacing: 0.08em;
+        }
+
+        header a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+        }
+
+        .form-card {
+            background: #fff;
+            border: 1px solid #e6d5b8;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(59, 42, 31, 0.08);
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 0.85rem 1rem;
+            border: 1px solid #e6d5b8;
+            border-radius: 6px;
+            color: #3b2a1f;
+            font: inherit;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: 2px solid #d8bd95;
+            outline-offset: 2px;
+        }
+
+        .field-error {
+            margin-top: 0.4rem;
+            color: #8a3325;
+            font-size: 0.9rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .submit-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 0.85rem 1.25rem;
+            background: #8a5a3b;
+            color: #fffaf2;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #6d4529;
+        }
+
+        .back-link {
+            color: #8a5a3b;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a th:href="@{/main}">MOČIUTĖS RECEPTAI</a></h1>
+    </header>
+
+    <main>
+        <section class="form-card">
+            <h2>Redaguoti komentarą</h2>
+
+            <form th:action="@{/recipes/comments/{id}/edit(id=${comment.id})}" th:object="${commentForm}" method="post">
+                <label for="text">Komentaras</label>
+                <textarea id="text" th:field="*{text}" required></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">
+                    Komentaro klaida
+                </p>
+
+                <div class="form-actions">
+                    <a th:href="@{/recipes/{id}(id=${comment.recipe.id})}" class="back-link">← Atgal į receptą</a>
+                    <button type="submit" class="submit-btn">Išsaugoti pakeitimus</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

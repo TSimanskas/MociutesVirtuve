@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mano profilis · Močiutės Receptai</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: Georgia, 'Times New Roman', serif;
+            color: #3b2a1f;
+            background: #fffaf2;
+        }
+
+        header {
+            background: #f5e9d7;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e6d5b8;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.4rem);
+            letter-spacing: 0.08em;
+        }
+
+        header a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .auth-nav {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #8a5a3b;
+            font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+            font-weight: bold;
+        }
+
+        .auth-nav a,
+        .logout-btn {
+            color: #fffaf2;
+            background: #6d4529;
+            padding: 0.75rem 1.1rem;
+            border: 1px solid #5a351f;
+            border-radius: 0;
+            border-bottom-left-radius: 16px;
+            cursor: pointer;
+            font: inherit;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(59, 42, 31, 0.12);
+        }
+
+        .auth-nav a:hover,
+        .logout-btn:hover {
+            background: #8a5a3b;
+            text-decoration: none;
+        }
+
+        .auth-nav .profile-icon-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border: 2px solid #8a5a3b;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f8ead6;
+        }
+
+        .auth-nav .profile-icon-link:hover {
+            background: #ead7bd;
+            text-decoration: none;
+        }
+
+        .profile-icon,
+        .profile-icon-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .profile-icon {
+            display: block;
+            object-fit: cover;
+        }
+
+        .profile-icon-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a5a3b;
+            font-weight: bold;
+            background: #f8ead6;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+        }
+
+        .profile-card {
+            background: #fff;
+            border: 1px solid #e6d5b8;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(59, 42, 31, 0.08);
+        }
+
+        .profile-top {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f5e9d7;
+            background: #f5e9d7;
+        }
+
+        .profile-picture-button {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            border: none;
+            border-radius: 50%;
+            background: none;
+            cursor: pointer;
+            padding: 0;
+            font: inherit;
+        }
+
+        .profile-placeholder {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5e9d7;
+            border: 4px solid #e6d5b8;
+            color: #8a5a3b;
+            font-size: 4rem;
+            font-weight: bold;
+        }
+
+        .picture-hint {
+            position: absolute;
+            left: 50%;
+            bottom: 0.4rem;
+            transform: translateX(-50%);
+            width: max-content;
+            max-width: 160px;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(109, 69, 41, 0.9);
+            color: #fffaf2;
+            font-size: 0.8rem;
+        }
+
+        .image-input {
+            display: none;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .username {
+            color: #8a7763;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #fffaf2;
+            border: 1px solid #f0e3c7;
+            border-radius: 6px;
+            padding: 0.85rem 1rem;
+            min-width: 130px;
+        }
+
+        .stat strong {
+            display: block;
+            color: #8a5a3b;
+            font-size: 1.4rem;
+        }
+
+        .message {
+            background: #edf7e8;
+            border: 1px solid #cfe6c4;
+            color: #355d2a;
+            border-radius: 6px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section {
+            border-top: 1px solid #e6d5b8;
+            padding-top: 1.75rem;
+        }
+
+        .form-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid #e6d5b8;
+            border-radius: 6px;
+            color: #3b2a1f;
+            font: inherit;
+            background: #fff;
+        }
+
+        input:focus {
+            outline: 2px solid #d8bd95;
+            outline-offset: 2px;
+        }
+
+        .field {
+            margin-bottom: 1.25rem;
+        }
+
+        .field-error {
+            margin-top: 0.35rem;
+            color: #8a3325;
+            font-size: 0.9rem;
+        }
+
+        .help {
+            margin-top: 0.35rem;
+            color: #8a7763;
+            font-size: 0.9rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .submit-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 0.9rem 1.5rem;
+            background: #8a5a3b;
+            color: #fffaf2;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #6d4529;
+        }
+
+        .back-link {
+            color: #8a5a3b;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 700px) {
+            .profile-top {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .profile-picture-button {
+                margin: 0 auto;
+            }
+
+            .stats {
+                justify-content: center;
+            }
+
+            .auth-nav {
+                position: static;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a th:href="@{/main}">MOČIUTĖS RECEPTAI</a></h1>
+        <nav class="auth-nav">
+            <a th:href="@{/profile}" class="profile-icon-link" th:attr="aria-label=|Profilis: ${currentDisplayName}|">
+                <img class="profile-icon"
+                     th:if="${currentProfileImageUrl != null and not #strings.isEmpty(currentProfileImageUrl)}"
+                     th:src="${currentProfileImageUrl}"
+                     th:alt="${currentDisplayName}">
+                <span class="profile-icon-placeholder"
+                      th:unless="${currentProfileImageUrl != null and not #strings.isEmpty(currentProfileImageUrl)}"
+                      th:text="${currentProfileInitial}">V</span>
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Atsijungti</button>
+            </form>
+        </nav>
+    </header>
+
+    <main>
+        <section class="profile-card">
+            <p class="message" th:if="${profileUpdated}">
+                Profilis atnaujintas.
+            </p>
+
+            <div class="profile-top">
+                <button type="button" class="profile-picture-button" id="profile-picture-button">
+                    <img class="profile-image"
+                         th:if="${user.profileImageUrl != null and not #strings.isEmpty(user.profileImageUrl)}"
+                         th:src="${user.profileImageUrl}"
+                         th:alt="${profileName}">
+
+                    <span class="profile-placeholder"
+                          th:unless="${user.profileImageUrl != null and not #strings.isEmpty(user.profileImageUrl)}"
+                          th:text="${#strings.substring(profileName, 0, 1)}">
+                        M
+                    </span>
+
+                    <span class="picture-hint">Įkelti nuotrauką</span>
+                </button>
+
+                <div>
+                    <h2 th:text="${profileName}">Vartotojo vardas</h2>
+                    <p class="username">
+                        Prisijungimo vardas: <strong th:text="${user.username}">username</strong>
+                    </p>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <strong th:text="${recipeCount}">0</strong>
+                            receptai
+                        </div>
+                        <div class="stat">
+                            <strong th:text="${commentCount}">0</strong>
+                            komentarai
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Redaguoti profilį</h3>
+
+                <form th:action="@{/profile}" th:object="${profileForm}" method="post" enctype="multipart/form-data">
+                    <input id="profileImage"
+                           class="image-input"
+                           th:field="*{profileImage}"
+                           type="file"
+                           accept="image/*">
+                    <p class="field-error" th:if="${#fields.hasErrors('profileImage')}" th:errors="*{profileImage}">
+                        Nuotraukos klaida
+                    </p>
+
+                    <div class="field">
+                        <label for="displayName">Rodomas vardas</label>
+                        <input id="displayName" th:field="*{displayName}" type="text" required>
+                        <p class="field-error" th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}">
+                            Vardo klaida
+                        </p>
+                    </div>
+
+                    <p class="help">Profilio nuotrauką galite pakeisti paspaudę ant profilio ikonėlės.</p>
+
+                    <div class="actions">
+                        <a th:href="@{/main}" class="back-link">← Grįžti į pagrindinį puslapį</a>
+                        <button type="submit" class="submit-btn">Išsaugoti profilį</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script>
+        const profilePictureButton = document.getElementById('profile-picture-button');
+        const profileImageInput = document.getElementById('profileImage');
+
+        profilePictureButton?.addEventListener('click', () => {
+            profileImageInput?.click();
+        });
+    </script>
+</body>
+</html>
